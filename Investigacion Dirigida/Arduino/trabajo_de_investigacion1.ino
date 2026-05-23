@@ -1,12 +1,20 @@
-#include <LiquidCrystal.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
-LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
+// En tu simulador la pantalla está en 0x20
+LiquidCrystal_I2C lcd(0x20, 16, 2);
 
 const int pinAnalogico = A0;
 const float VREF = 5.0;
 
 void setup() {
-  lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Iniciando...");
+  delay(1000);
   lcd.clear();
 }
 
@@ -24,10 +32,6 @@ void loop() {
 
   float anguloReal = 0.0;
 
-  // Calibración por tramos:
-  // 0.00V -> 0°
-  // 1.11V -> 90°
-  // 5.00V -> 180°
   if (voltaje <= 1.11) {
     anguloReal = (voltaje / 1.11) * 90.0;
   } else {
