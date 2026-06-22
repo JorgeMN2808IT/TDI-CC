@@ -1,11 +1,19 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-// En tu simulador la pantalla está en 0x20
+// Dirección I2C de la pantalla.
+// En físico muchas pantallas usan 0x27, pero en algunos simuladores puede ser 0x20.
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 const int pinAnalogico = A0;
 const float VREF = 5.0;
+
+// Rango real del potenciómetro
+const float ANGULO_MAX = 270.0;
+
+// Voltajes de calibración
+const float VOLTAJE_MIN = 0.0;
+const float VOLTAJE_MAX = 5.0;
 
 void setup() {
   lcd.init();
@@ -28,18 +36,18 @@ void loop() {
   }
 
   float adcPromedio = suma / (float)muestras;
+
   float voltaje = adcPromedio * (VREF / 1023.0);
 
-  float anguloReal = 0.0;
+  float anguloReal = (voltaje - VOLTAJE_MIN) * (ANGULO_MAX / (VOLTAJE_MAX - VOLTAJE_MIN));
 
-  if (voltaje <= 1.11) {
-    anguloReal = (voltaje / 1.11) * 90.0;
-  } else {
-    anguloReal = 90.0 + ((voltaje - 1.11) / (5.0 - 1.11)) * 90.0;
+  if (anguloReal < 0) {
+    anguloReal = 0;
   }
 
-  if (anguloReal < 0) anguloReal = 0;
-  if (anguloReal > 180) anguloReal = 180;
+  if (anguloReal > 270) {
+    anguloReal = 270;
+  }
 
   int angulo = (int)(anguloReal + 0.5);
 
